@@ -1,0 +1,21 @@
+.grid {
+    width: 420px;
+    height: 840px;
+    display: flex;
+    flex-wrap: wrap;
+    background-color: #DFF3E3;
+}
+
+.grid div {
+    width: 40px;
+    height: 40px;
+}
+
+.line {
+    border: 1px solid #BEE5BF;
+    border-radius: 4px;
+}
+
+.tetromino {
+    background-color: #CE7DA5;
+}
