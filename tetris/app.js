@@ -1,7 +1,6 @@
 import { tetromino } from './tetromino.js'
 import { grid } from './grid.js'
 
-const scoreDisplay = document.querySelector('#score');
 const startBtn = document.querySelector('#start-button');
 const newGameBtn = document.querySelector('#clear-button');
 
@@ -9,40 +8,119 @@ document.addEventListener('DOMContentLoaded', () => {
     grid.make();
     grid.makeMini();
     tetromino.reNew(grid, tetromino.setRandom());
-    console.log(tetromino.current)
 
-    let timerId;
+    let moving = 500; // whole loop
+    let half = moving / 2;
+    let requestId, start;
+    let checkRemove, gameOver = false;
+
+    function gameLoop() {
+        let timePassed = Date.now() - start;
+        // draw tetromino (next tetromino) on board
+        tetromino.draw(grid)
+        if (checkRemove && timePassed >= half) {
+            // remove
+            checkRemove = !grid.remove();
+            // make new tetromino
+            tetromino.reNew(grid,tetromino.next.getProperties());
+            // check game over
+            if (grid.isBusy(tetromino.current)) {
+                console.log('game over')
+                gameOver = true;
+            }
+        }
+        if (timePassed >= moving) {
+            move();
+        }
+        if (gameOver) {
+            startBtn.disabled = true;
+        } else {
+            requestId = window.requestAnimationFrame(gameLoop);
+        }
+    }
+
+    function move() {
+        // if after bingo line not removed, exit
+        if (checkRemove) {
+            return;
+        }
+        // try to freeze tetromino, if it at the bottom or on another tetromino
+        if (tetromino.freeze(grid)) {
+            if (grid.bingo()) {
+                checkRemove = true;
+                start = Date.now();
+            } else {
+                tetromino.reNew(grid,tetromino.next.getProperties());
+                // check game over
+                if (grid.isBusy(tetromino.current)) {
+                    console.log('game over2')
+                    gameOver = true;
+                } else {
+                    start = Date.now();
+                }
+            }
+        } else {
+            tetromino.moveDown(grid);
+            start = Date.now();
+        }
+    }
+
+    document.addEventListener('keyup', e => {
+        if (e.key === 'ArrowLeft') {
+            tetromino.moveLeft(grid);
+        } else if (e.key === 'ArrowRight') {
+            tetromino.moveRight(grid);
+        } else if (e.key === 'ArrowUp') {
+            tetromino.rotate(grid);
+        } else if (e.key === 'ArrowDown') {
+            console.log('keyup');
+            move();
+        }
+    })
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft') {
+            tetromino.moveLeft(grid);
+        } else if (e.key === 'ArrowRight') {
+            tetromino.moveRight(grid);
+        } else if (e.key === 'ArrowUp') {
+            tetromino.rotate(grid);
+        } else if (e.key === 'ArrowDown') {
+            console.log('keydown');
+            move();
+        }
+    })
+
+    document.addEventListener('keypress', e => {
+        if (e.key === 'ArrowLeft') {
+            tetromino.moveLeft(grid);
+        } else if (e.key === 'ArrowRight') {
+            tetromino.moveRight(grid);
+        } else if (e.key === 'ArrowUp') {
+            tetromino.rotate(grid);
+        } else if (e.key === 'ArrowDown') {
+            console.log('keypress');
+            move();
+        }
+    })
 
     startBtn.addEventListener('click', () => {
-        if (timerId) {
-            clearInterval(timerId);
-            timerId = null;
+        if (requestId) {
+            window.cancelAnimationFrame(requestId);
+            requestId = undefined;
         } else {
-            tetromino.draw(grid)
-            timerId = setInterval(() => {
-                // if the current tetromino is already at the bottom of the grid,
-                // then need freeze it and create a new one
-                tetromino.freeze(grid)
-                // then can move down
-                tetromino.moveDown(grid)
-            },500)
+            start = Date.now()
+            requestId = window.requestAnimationFrame(gameLoop);
         }
     })
 
     newGameBtn.addEventListener('click', () => {
-        grid.clear(tetromino, tetromino.setRandom())
-    })
-
-    document.addEventListener('keyup', e => {
-        if (e.key === 'ArrowLeft') {
-            tetromino.moveLeft(grid)
-        } else if (e.key === 'ArrowRight') {
-            tetromino.moveRight(grid)
-        } else if (e.key === 'ArrowUp') {
-            tetromino.rotate(grid)
-        } else if (e.key === 'ArrowDown') {
-            tetromino.freeze(grid)
-            tetromino.moveDown(grid)
-        }
+        requestId = undefined;
+        start = undefined;
+        checkRemove = false;
+        gameOver = false;
+        grid.clear();
+        tetromino.reNew(grid, tetromino.setRandom());
+        startBtn.disabled = false;
     })
 })

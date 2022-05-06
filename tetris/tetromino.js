@@ -1,4 +1,5 @@
 export { tetromino }
+import { bingoColor } from './grid.js'
 
 const jTetromino = {
     body: [
@@ -14,9 +15,8 @@ const jTetromino = {
         [4, 8, 9, 10]
     ],
     width : 3,
-    height : 3,
-    move : ['left', '', 'right', ''], // need to move away from the edge before rotate
-    correct : [1, 0, 1, 0] // need to +/- to correct position
+    left : [1, 0, 0, 0], // need to +/- to correct position
+    right : [0, 0, -1, 0]
 }
 
 const lTetromino = {
@@ -33,9 +33,8 @@ const lTetromino = {
         [4, 5, 6, 8]
     ],
     width : 3,
-    height : 3,
-    move : ['right', '', 'left', ''], // need to move away from the edge before rotate
-    correct : [1, 0, 1, 0] // need to +/- to correct position
+    left : [0, 0, 1, 0], // need to +/- to correct position
+    right : [-1, 0, 0, 0]
 }
 
 const sTetromino = {
@@ -52,9 +51,8 @@ const sTetromino = {
         [0, 4, 5, 9]
     ],
     width : 3,
-    height : 3,
-    move : ['', 'left', '', 'right'], // need to move away from the edge before rotate
-    correct : [0, 1, 0, 1] // need to +/- to correct position
+    left : [0, 1, 0, 0], // need to +/- to correct position
+    right : [0, 0, 0, -1]
 }
 
 const zTetromino = {
@@ -71,9 +69,8 @@ const zTetromino = {
         [1, 4, 5, 8]
     ],
     width : 3,
-    height : 3,
-    move : ['', 'left', '', 'right'], // need to move away from the edge before rotate
-    correct : [0, 1, 0, 1] // need to +/- to correct position
+    left : [0, 1, 0, 0], // need to +/- to correct position
+    right : [0, 0, 0, -1]
 }
 
 const tTetromino = {
@@ -90,9 +87,8 @@ const tTetromino = {
         [1, 4, 5, 9]
     ],
     width : 3,
-    height : 3,
-    move : ['', 'left', '', 'right'], // need to move away from the edge before rotate
-    correct : [0, 1, 0, 1] // need to +/- to correct position
+    left : [0, 1, 0, 0], // need to +/- to correct position
+    right : [0, 0, 0, -1]
 }
 
 const oTetromino = {
@@ -108,10 +104,9 @@ const oTetromino = {
         [0, 1, 4, 5],
         [0, 1, 4, 5]
     ],
-    width : 3,
-    height : 3,
-    move : ['', '', '', ''], // need to move away from the edge before rotate
-    correct : [0, 0, 0, 0] // need to +/- to correct position
+    width: 3,
+    left : [0, 0, 0, 0], // need to +/- to correct position
+    right : [-1, -1, -1, -1]
 }
 
 const iTetromino = {
@@ -128,10 +123,8 @@ const iTetromino = {
         [8, 9, 10, 11]
     ],
     width : 4,
-    height : 4,
-    move : ['both', '', 'both', ''], // need to move away from the edge before rotate
-    fromLeft : [1, 0, 2, 0], // need to +/- to correct position
-    fromRight : [2, 0, 1, 0] // need to +/- to correct position
+    left : [1, 0, 2, 0], // need to +/- to correct position
+    right : [-2, 0, -1, 0]
 }
 
 // all tetrominoes
@@ -142,82 +135,92 @@ const theTetrominoes = [
 
 const defaultPositionInGrid = 4;
 
+const colors = ['#446DF6' ,'#8CB369', '#F4A259',
+'#5B8E7D', '#FE4A49', '#2AB7CA', '#FED766', '#89023E', '#EA638C'];
+
 // current tetromino in game
-let makeTetromino = function ([random,  rotation, position]) {
+let makeTetromino = function ([random,  rotation, color, position]) {
     return {
-        random : random,
+        kind : random,
         rotation : rotation,
         position : position,
         body : theTetrominoes[random]['body'][rotation],
-        move : theTetrominoes[random]['move'][rotation],
-        fromLeft : function () {
-            if (theTetrominoes[this.random]['fromLeft'] !== undefined) {
-                return theTetrominoes[this.random]['fromLeft'][this.rotation];
-            } else {
-                return theTetrominoes[this.random]['correct'][this.rotation];
+        color : color,
+        coordinateX : function () {
+            if (typeof theTetrominoes[random]['width'] === 'number') {
+                return  defaultPositionInGrid + Math.floor(theTetrominoes[random]['width'] / 2);
             }
-        },
-        fromRight : function () {
-            if (theTetrominoes[this.random]['fromRight'] !== undefined) {
-                return theTetrominoes[this.random]['fromRight'][this.rotation];
-            } else {
-                return theTetrominoes[this.random]['correct'][this.rotation];
-            }
-        },
-        rotate : function (rotateNow) {
+            return defaultPositionInGrid;
+        }(),
+        makeRotation : function (rotateNow) {
             if (rotateNow !== undefined) {
                 this.rotation = rotateNow;
             }
-            this.body = theTetrominoes[this.random]['body'][this.rotation];
-            this.move = theTetrominoes[this.random]['move'][this.rotation];
+            this.body = theTetrominoes[this.kind]['body'][this.rotation];
         },
-        getCoordinates : function () {
-            return [this.random, this.rotation, this.position];
-        }
+        getProperties : function () {
+            return [this.kind, this.rotation, this.color, this.position];
+        },
+        getSide : function (grid) {
+            if (this.coordinateX < grid.halfW) {
+                return 'left';
+            } else {
+                return 'right';
+            }
+        },
     }
 }
 
 // current next tetromino in game
-let makeMini = function ([random, rotation]) {
+let makeMini = function ([random, rotation, color]) {
     return {
-        random : random,
+        kind : random,
         rotation : rotation,
         mini : theTetrominoes[random]['mini'][rotation],
+        color : color,
+        getProperties : function () {
+            return [this.kind, this.rotation, this.color];
+        },
     }
 }
 
 let tetromino = {
-    start : true,
-    side : '',
-    setRandom : function () {
-        let random = makeRandom(theTetrominoes.length);
-        let rotation = makeRandom(theTetrominoes[0].body.length);
-        return [random, rotation];
-    },
     // current tetromino in game
     current : {},
     // next tetromino in game
     next : {},
+    // makes random index for tetromino shape
+    setRandom : function () {
+        let random = makeRandom(theTetrominoes.length);
+        let rotation = makeRandom(theTetrominoes[0].body.length);
+        let color = makeRandom(colors.length);
+        return [random, rotation, color];
+    },
     // resets the current settings of the tetromino
-    reNew : function (grid, [random, rotation]) {
-        this.start = true;
+    reNew : function (grid, [random, rotation, color]) {
         this.clear(grid, true);
-        this.current = makeTetromino([random, rotation, defaultPositionInGrid]);
+        this.current = makeTetromino([random, rotation, color, defaultPositionInGrid]);
         // make new random for next tetromino
         this.next = makeMini(this.setRandom());
         this.draw(grid, true);
     },
     // adds tetromino to the grid
-    draw : function (grid, mini = false) {
+    draw : function (grid, mini = false, bingo = false) {
         if (mini) {
             // draw mini
             this.next.mini.forEach(index => {
-                grid.miniSchema[index].classList.add('tetromino');
+                grid.miniSchema[index].style.backgroundColor = colors[this.next.color];
             })
         } else {
             // draw normal
             this.current.body.forEach(index => {
-                grid.schema[this.current.position + index].classList.add('tetromino');
+                let t = grid.schema[this.current.position + index];
+                if (t.classList.contains('bingo')) {
+                    console.log('in draw bingo color')
+                    t.style.backgroundColor = bingoColor;
+                    return;
+                }
+                t.style.backgroundColor = colors[this.current.color];
             })
         }
     },
@@ -229,12 +232,12 @@ let tetromino = {
                 return;
             }
             this.next.mini.forEach(index => {
-                grid.miniSchema[index].classList.remove('tetromino');
+                grid.miniSchema[index].style.backgroundColor = '';
             })
         } else {
             // clear normal
             this.current.body.forEach(index => {
-                grid.schema[this.current.position + index].classList.remove('tetromino');
+                grid.schema[this.current.position + index].style.backgroundColor = '';
             })
         }
     },
@@ -242,102 +245,84 @@ let tetromino = {
     // and freezes it if it is at the bottom or above another tetromino
     freeze : function (grid) {
         if (grid.isBottomOrIsBusy(this.current)) {
+            // freeze tetromino
             this.current.body.forEach(index => {
                 grid.schema[this.current.position + index].classList.add('frozen');
             });
-            this.reNew(grid,[this.next.random, this.next.rotation]);
+            // this.reNew(grid,[this.next.kind, this.next.rotation]);
+            return true;
         }
-    },
-    isSide : function (grid) {
-        if ((this.current.position + 1) % 10 < grid.halfW) { // correct +1 half width of tetromino
-            this.side = 'left'
-        } else {
-            this.side = 'right'
-        }
+        return false;
     },
     moveLeft : function(grid) {
-        this.isSide(grid);
+        // copy position to view change after
+        let position = this.current.position;
         this.clear(grid);
         // check movement inside grid
-        if (!grid.leftEdge(this.current)) {
+        if (!grid.onLeftEdge(this.current)) {
             this.current.position--; // move
         }
         // check neighbour cell for tetromino
         if (grid.isBusy(this.current)) {
             this.current.position++; // undo
         }
+        // check change position or not
+        if (position !== this.current.position) {
+            this.current.coordinateX--;
+        }
         this.draw(grid);
     },
     moveRight : function(grid) {
-        this.isSide(grid);
+        // copy position to view change after
+        let position = this.current.position;
         this.clear(grid);
         // check movement inside grid
-        if (!grid.rightEdge(this.current)) {
+        if (!grid.onRightEdge(this.current)) {
             this.current.position++; // move
         }
         // check new position for already staying tetromino
         if (grid.isBusy(this.current)) {
             this.current.position--; // undo
         }
+        // check change position or not
+        if (position !== this.current.position) {
+            this.current.coordinateX++;
+        }
         this.draw(grid);
     },
     moveDown : function(grid) {
-        if (!this.start) {
-            this.clear(grid);
-            this.current.position += grid.width;
-        }
+        this.clear(grid);
+        this.current.position += grid.width;
         this.draw(grid);
-        this.start = false;
     },
     rotate : function (grid) {
         this.clear(grid);
-        // safe current tetromino to buffer before change the current
-        let bufTetromino = makeTetromino(this.current.getCoordinates());
-
+        // copy current tetromino to buffer before change the current
+        let bufTetromino = makeTetromino(this.current.getProperties());
+        // save side before rotate
+        let side = this.current.getSide(grid);
         // make rotation value
-        this.current.rotation++
+        this.current.rotation++;
         // if the current rotation gets 4, need change to default 0
         if (this.current.rotation === this.current.body.length) {
             this.current.rotation = 0;
         }
         // make new rotated tetromino
-        this.current.rotate()
-        // check if it is safe side to rotate
-        // also in "if" need to correct current position,
-        // because if "moveForm=left" it means that current position will be equal to 9 instead of 10
-        // position 9 - will show unCorrect position at left edge
-        if (this.side === 'left' && bufTetromino.move === 'left') {
-            let correct = this.current.position + bufTetromino.fromLeft();
-            if (grid.leftEdge(this.current, correct)) {
-                // check if tetromino near edge
-                console.log('move from left')
-                this.current.position = correct; // move to the right
+        this.current.makeRotation();
+        // checks after rotation if the tetromino is on the other side
+        if (side === 'left' && grid.onRightEdge(this.current)) {
+            while (grid.onRightEdge(this.current)) {
+                this.current.position++;
+                this.current.coordinateX++;
             }
-        } else if (this.side === 'right' && bufTetromino.move === 'right') {
-            let correct = this.current.position - bufTetromino.fromRight();
-            if (grid.rightEdge(this.current, correct)) {
-                console.log('move from right')
-                this.current.position = correct; // move to the left
-            }
-        } else if (bufTetromino.move === 'both') {
-            // check if tetromino near edge
-            if (this.side === 'left') {
-                let correct = this.current.position + bufTetromino.fromLeft();
-                if (grid.leftEdge(this.current, correct)) {
-                    console.log('in both - left', correct)
-                    this.current.position = correct;
-                }
-            } else {
-                let correct = this.current.position - bufTetromino.fromRight();
-                if (grid.rightEdge(this.current, correct)) {
-                    console.log('in both - right', correct)
-                    this.current.position = correct;
-                }
+        } else if (side === 'right' && grid.onLeftEdge(this.current)) {
+            while (grid.onLeftEdge(this.current)) {
+                this.current.position--;
+                this.current.coordinateX--;
             }
         }
         // check new position for already staying tetromino
         if (grid.isBusy(this.current)) {
-            console.log('undo settings')
             // undo changes
             this.current = bufTetromino;
         }

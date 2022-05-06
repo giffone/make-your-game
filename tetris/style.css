@@ -13,6 +13,7 @@
 .grid {
     width: 420px;
     height: 840px;
+    margin-bottom: 50px;
 }
 
 .menu {
@@ -41,8 +42,4 @@
 .line {
     border: 1px solid #BEE5BF;
     border-radius: 4px;
-}
-
-.tetromino {
-    background-color: #CE7DA5;
 }
