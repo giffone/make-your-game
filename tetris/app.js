@@ -5,6 +5,7 @@ const startBtn = document.querySelector('#start-button');
 const newGameBtn = document.querySelector('#clear-button');
 
 document.addEventListener('DOMContentLoaded', () => {
+    newGameBtn.disabled = true;
     grid.make();
     grid.makeMini();
     tetromino.reNew(grid, tetromino.setRandom());
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (grid.isBusy(tetromino.current)) {
                     console.log('game over2')
                     gameOver = true;
+                    newGameBtn.disabled = false;
                 } else {
                     start = Date.now();
                 }
@@ -65,56 +67,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.addEventListener('keyup', e => {
-        if (e.key === 'ArrowLeft') {
-            tetromino.moveLeft(grid);
-        } else if (e.key === 'ArrowRight') {
-            tetromino.moveRight(grid);
-        } else if (e.key === 'ArrowUp') {
-            tetromino.rotate(grid);
-        } else if (e.key === 'ArrowDown') {
-            console.log('keyup');
-            move();
-        }
-    })
-
     document.addEventListener('keydown', e => {
+        if (gameOver) {
+            return;
+        }
         if (e.key === 'ArrowLeft') {
             tetromino.moveLeft(grid);
         } else if (e.key === 'ArrowRight') {
             tetromino.moveRight(grid);
-        } else if (e.key === 'ArrowUp') {
-            tetromino.rotate(grid);
         } else if (e.key === 'ArrowDown') {
-            console.log('keydown');
             move();
         }
     })
 
-    document.addEventListener('keypress', e => {
-        if (e.key === 'ArrowLeft') {
-            tetromino.moveLeft(grid);
-        } else if (e.key === 'ArrowRight') {
-            tetromino.moveRight(grid);
-        } else if (e.key === 'ArrowUp') {
+    document.addEventListener('keyup', e => {
+        if (gameOver) {
+            return;
+        }
+        if (e.key === 'ArrowUp') {
             tetromino.rotate(grid);
-        } else if (e.key === 'ArrowDown') {
-            console.log('keypress');
-            move();
         }
     })
 
     startBtn.addEventListener('click', () => {
         if (requestId) {
+            console.log('strbtn in cancel, id is', requestId);
             window.cancelAnimationFrame(requestId);
             requestId = undefined;
+            newGameBtn.disabled = false;
         } else {
+            console.log('strbtn in start, id is', requestId);
+            newGameBtn.disabled = true;
             start = Date.now()
             requestId = window.requestAnimationFrame(gameLoop);
         }
     })
 
     newGameBtn.addEventListener('click', () => {
+        console.log('newgame btn in cancel, id is (bef)', requestId);
         requestId = undefined;
         start = undefined;
         checkRemove = false;
@@ -122,5 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.clear();
         tetromino.reNew(grid, tetromino.setRandom());
         startBtn.disabled = false;
+        console.log('newgame btn in cancel, id is (aft)', requestId);
     })
 })
+

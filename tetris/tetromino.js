@@ -135,8 +135,28 @@ const theTetrominoes = [
 
 const defaultPositionInGrid = 4;
 
-const colors = ['#446DF6' ,'#8CB369', '#F4A259',
-'#5B8E7D', '#FE4A49', '#2AB7CA', '#FED766', '#89023E', '#EA638C'];
+const colors = [
+    '#00B2CA',
+    // '#C7EF00',
+    '#0C8346',
+    '#33658A',
+    '#665687',
+    '#D64550',
+    '#FFB20F',
+    '#FFE548',
+    '#06B2A7',
+    '#446DF6', 
+    // '#8CB369', 
+    // '#F4A259',
+    // '#5B8E7D', 
+    '#FE4A49', 
+    // '#2AB7CA', 
+    // '#FED766', 
+    // '#89023E', 
+    '#EA638C',
+    '#FF85DE',
+    '#9410D1',
+];
 
 // current tetromino in game
 let makeTetromino = function ([random,  rotation, color, position]) {
@@ -322,7 +342,7 @@ let tetromino = {
             }
         }
         // check new position for already staying tetromino
-        if (grid.isBusy(this.current)) {
+        if (grid.isBottomOrIsBusy(this.current)) {
             // undo changes
             this.current = bufTetromino;
         }
