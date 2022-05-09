@@ -127,6 +127,28 @@ const iTetromino = {
     right : [-2, 0, -1, 0]
 }
 
+const gameOverTetromino = [
+    1, 2, 3, 4, 7,
+    11, 16, 18,
+    21, 23, 24, 26, 27, 28,
+    31, 32, 33, 36, 38,
+
+    51, 52, 54, 55, 57, 58, 59,
+    61, 63, 65, 67,
+    71, 73, 75, 77, 78,
+    81, 85, 87, 88, 89,
+
+    111, 112, 113, 116, 118,
+    121, 123, 126, 128,
+    131, 133, 136, 138,
+    141, 142, 143, 147,
+
+    161, 162, 163, 166, 167, 168,
+    171, 176, 178,
+    181, 182, 186, 187,
+    191, 192, 193, 196, 198
+]
+
 // all tetrominoes
 const theTetrominoes = [
     jTetromino, lTetromino, sTetromino,
@@ -226,6 +248,7 @@ let tetromino = {
     },
     // adds tetromino to the grid
     draw : function (grid, mini = false, bingo = false) {
+        console.log('in draw');
         if (mini) {
             // draw mini
             this.next.mini.forEach(index => {
@@ -236,11 +259,15 @@ let tetromino = {
             this.current.body.forEach(index => {
                 let t = grid.schema[this.current.position + index];
                 if (t.classList.contains('bingo')) {
-                    console.log('in draw bingo color')
                     t.style.backgroundColor = bingoColor;
                     return;
                 }
-                t.style.backgroundColor = colors[this.current.color];
+                if (this.current.color === undefined) {
+                    t.style.backgroundColor = 'black';
+                    console.log('black');
+                } else {
+                    t.style.backgroundColor = colors[this.current.color];
+                }
             })
         }
     },
@@ -347,6 +374,37 @@ let tetromino = {
             this.current = bufTetromino;
         }
         this.draw(grid);
+    },
+    gameOver : function (grid) {
+        this.current = {
+            body : gameOverTetromino,
+            position : 0
+        };
+        console.log(this.current);
+        this.draw(grid);
+    },
+    // move tetromino up
+    moveUp : function (grid) {
+        console.log('before not enought', this.current.body);
+        this.current.body = this.outOfGrid();
+        while (grid.isBusy(this.current)) {
+            console.log('not enought', this.current.body);
+            this.current.body = this.outOfGrid();
+        }
+        console.log('enought', this.current.body);
+        this.draw(grid);
+    },
+    // checks if tetromino stays out of grid
+    outOfGrid : function () {
+        let buf = [];
+        this.current.body.forEach(element => {
+            let e = element - 10; // -10 move up
+            if (e >= 0) {
+                buf = [...buf, e];
+            }
+        })
+        console.log(buf);
+        return buf;
     }
 }
 

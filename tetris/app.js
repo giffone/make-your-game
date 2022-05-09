@@ -1,19 +1,18 @@
 import { tetromino } from './tetromino.js'
 import { grid } from './grid.js'
 
-const startBtn = document.querySelector('#start-button');
-const newGameBtn = document.querySelector('#clear-button');
+const newGameBtn = document.querySelector('#new-game-button');
+const pauseGameBtn = document.querySelector('#pause-game-button');
 
 document.addEventListener('DOMContentLoaded', () => {
-    newGameBtn.disabled = true;
     grid.make();
     grid.makeMini();
-    tetromino.reNew(grid, tetromino.setRandom());
+    pauseGameBtn.style.display = 'none';
 
     let moving = 500; // whole loop
     let half = moving / 2;
     let requestId, start;
-    let checkRemove, gameOver = false;
+    let checkRemove, gameOver, pause = false;
 
     function gameLoop() {
         let timePassed = Date.now() - start;
@@ -25,17 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // make new tetromino
             tetromino.reNew(grid,tetromino.next.getProperties());
             // check game over
-            if (grid.isBusy(tetromino.current)) {
-                console.log('game over')
-                gameOver = true;
-            }
+            gameOver = gameOverFunc();
         }
         if (timePassed >= moving) {
             move();
         }
-        if (gameOver) {
-            startBtn.disabled = true;
-        } else {
+        if (!gameOver) {
             requestId = window.requestAnimationFrame(gameLoop);
         }
     }
@@ -53,11 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 tetromino.reNew(grid,tetromino.next.getProperties());
                 // check game over
-                if (grid.isBusy(tetromino.current)) {
-                    console.log('game over2')
-                    gameOver = true;
-                    newGameBtn.disabled = false;
-                } else {
+                gameOver = gameOverFunc();
+                if (!gameOver) {
                     start = Date.now();
                 }
             }
@@ -67,8 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function gameOverFunc() {
+        if (grid.isBusy(tetromino.current)) {
+            tetromino.moveUp(grid);
+            newGameBtn.style.display = '';
+            pauseGameBtn.style.display = 'none';
+            tetromino.gameOver(grid);
+            return true;
+        }
+        return false;
+    }
+
     document.addEventListener('keydown', e => {
-        if (gameOver) {
+        if (gameOver || pause) {
             return;
         }
         if (e.key === 'ArrowLeft') {
@@ -81,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     document.addEventListener('keyup', e => {
-        if (gameOver) {
+        if (gameOver || pause) {
             return;
         }
         if (e.key === 'ArrowUp') {
@@ -89,30 +91,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
 
-    startBtn.addEventListener('click', () => {
+    pauseGameBtn.addEventListener('click', () => {
         if (requestId) {
-            console.log('strbtn in cancel, id is', requestId);
+            pauseGameBtn.textContent = 'Continue'
+            newGameBtn.style.display = '';
             window.cancelAnimationFrame(requestId);
             requestId = undefined;
-            newGameBtn.disabled = false;
+            pause = true;
         } else {
-            console.log('strbtn in start, id is', requestId);
-            newGameBtn.disabled = true;
+            newGameBtn.style.display = 'none';
+            pauseGameBtn.textContent = 'Pause'
+            pause = false;
             start = Date.now()
             requestId = window.requestAnimationFrame(gameLoop);
         }
     })
 
     newGameBtn.addEventListener('click', () => {
-        console.log('newgame btn in cancel, id is (bef)', requestId);
+        newGameBtn.style.display = 'none';
+        pauseGameBtn.textContent = 'Pause'
+        pauseGameBtn.style.display = '';
         requestId = undefined;
         start = undefined;
         checkRemove = false;
         gameOver = false;
+        pause = false;
         grid.clear();
         tetromino.reNew(grid, tetromino.setRandom());
-        startBtn.disabled = false;
-        console.log('newgame btn in cancel, id is (aft)', requestId);
+        start = Date.now()
+        requestId = window.requestAnimationFrame(gameLoop);
     })
 })
 

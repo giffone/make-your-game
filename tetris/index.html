@@ -12,12 +12,31 @@
         <div class="container">
             <div class="grid"></div>
             <div class="menu">
-                <button id="start-button">Start/Pause</button>
-                <button id="clear-button">NewGame</button>
-                <p>Score:<span id="score">0</span></p>
-                <p>Lines x2:<span id="lines">0</span></p>
-                <h3>Total:<span id="total">0</span></h3>
                 <div class="mini-grid"></div>
+                <div class="tables">
+                    <table id="score-table">
+                        <tr>
+                            <th></th>
+                            <th class="th-second">Score</th>
+                        </tr>
+                        <tr>
+                            <td class="label">line</td>
+                            <td><span id="score">0</span></td>
+                        </tr>
+                        <tr>
+                            <td class="label">lines (two or more)</td>
+                            <td><span id="lines">0</span></td>
+                        </tr>
+                        <tr>
+                            <td class="label"><h3>total</h3></td>
+                            <td><h3><span id="total">0</span></h3></td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="buttons-menu">
+                    <button id="new-game-button">New Game</button>
+                    <button id="pause-game-button">Pause</button>
+                </div>
             </div>
         </div>
     </div>

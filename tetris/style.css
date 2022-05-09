@@ -1,4 +1,10 @@
-.parent {
+body {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+}
+
+.parent,
+.menu {
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -21,13 +27,19 @@
 }
 
 .mini-grid {
-    margin-top: 50px;
     width: 168px;
     height: 168px;
 }
 
+.mini-grid,
+.buttons,
+.tables {
+    margin-bottom: 40px;
+}
+
 .grid,
 .mini-grid {
+    border: 3px solid #BEE5BF;
     display: flex;
     flex-wrap: wrap;
     background-color: #DFF3E3;
@@ -42,4 +54,50 @@
 .line {
     border: 1px solid #BEE5BF;
     border-radius: 4px;
+}
+
+#score-table {
+    margin-top: 20px;
+    border-collapse: collapse;
+    min-width: 300px;
+}
+
+td, th {
+    border: 1px solid #BEE5BF;
+    padding: 5px;
+}
+
+th {
+    text-align: center;
+}
+
+.th-second {
+    min-width: 70px;
+}
+
+td {
+
+    text-align: right;
+}
+
+#buttons-menu {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+button {
+    font-size: 16px;
+    cursor: pointer;
+    color: black;
+    background-color: white;
+    border: 2px solid #4CAF50;
+    padding: 16px 32px;
+    transition-duration: 0.4s;
+}
+
+button:hover {
+    background-color: #4CAF50;
+    color: white;
 }
