@@ -85,6 +85,9 @@ let grid = {
     // removes all tetromino from the grid for new game
     clear : function () {
         score = 0; lines = 0;
+        scoreHTML.innerHTML = String(score);
+        linesHTML.innerHTML = String(lines);
+        totalHTML.innerHTML = '0';
         this.schema.forEach((element, index) => {
             element.setAttribute("class", "line");
             element.style.backgroundColor = '';
@@ -94,14 +97,15 @@ let grid = {
             element.style.backgroundColor = '';
         });
     },
+    // left edge = 0, 10, 20, 30, ... [0, 0, 0, 0, ...]
     isLeftEdge : function (position) {
         return position % this.width === 0;
     },
+    // right edge = 9, 19, 29, 39, ... [9, 9, 9, 9, ...]
     isRightEdge : function (position) {
         return position % this.width === this.width - 1;
     },
     // checks if this is a left edge of the grid
-    // indexes of the left side = 0, 10, 20, 30 ... [0, 0, 0, 0 ...]
     onLeftEdge : function (current, position) {
         if (position === undefined) {
             return current.body.some(index => this.isLeftEdge(index + current.position));
@@ -110,7 +114,6 @@ let grid = {
         }
     },
     // checks if this is a right edge of the grid
-    // indexes of the right side = 9, 19, 29, 39 ... [9, 9, 9, 9 ...]
     onRightEdge : function (current, position) {
         if (position === undefined) {
             return current.body.some(index => this.isRightEdge(index + current.position));
